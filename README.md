@@ -25,6 +25,9 @@ zlib_install_dir: "/tmp/{{ zlib_ver }}"
 openssl_install_dir: "/tmp/{{ openssl_ver }}"
 nginx_user: nginx
 nginx_group: nginx
+nginx_streams:
+  - "server1.example.com"
+  - "server2.example.com"
 ```
 Example Playbook
 ----------------
@@ -32,6 +35,11 @@ Example Playbook
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
     - hosts: servers
+      vars:
+        nginx_streams:
+          - "site1.example.com"
+          - "site2.example.com"
+          - "site3.example.com"
       roles:
          - { role: nginx-lb }
 
