@@ -1,2 +1,202 @@
 ---
-# tasks file for nginx-lb
+  - name: Install nginx from source
+    hosts: lb
+    vars:
+      nginx_ver: nginx-1.15.0
+      pcre_ver: pcre-8.42
+      zlib_ver: zlib-1.2.11
+      openssl_ver: openssl-1.1.0h
+      nginx_tarball_url: "https://nginx.org/download/{{ nginx_ver }}.tar.gz"
+      pcre_tarball_url: "https://ftp.pcre.org/pub/pcre/{{ pcre_ver }}.tar.gz"
+      openssl_tarball_url: "https://www.openssl.org/source/{{ openssl_ver }}.tar.gz"
+      zlib_tarball_url: "https://www.zlib.net/{{ zlib_ver }}.tar.gz"
+      nginx_install_dir: "/tmp/{{ nginx_ver }}"
+      pcre_install_dir: "/tmp/{{ pcre_ver }}"
+      zlib_install_dir: "/tmp/{{ zlib_ver }}"
+      openssl_install_dir: "/tmp/{{ openssl_ver }}"
+      nginx_user: nginx
+      nginx_group: nginx
+    
+    tasks:
+      - name: Ensure group {{ nginx_group }} exists
+        group:
+          name: "{{ nginx_group }}"
+          gid: 501
+          state: present
+
+      - name: Add the user {{ nginx_user }}
+        user:
+          name: "{{ nginx_user }}"
+          comment: Nginx Admin User
+          shell: /bin/false
+          uid: 501
+          group: "{{ nginx_group }}"
+
+      - name: Install all dependancies
+        package:
+          name: "{{ item }}"
+          state: present
+          update_cache: yes
+        with_items:
+          - build-essential 
+          - git 
+          - tree
+          - perl 
+          - libperl-dev 
+          - libgd3 
+          - libgd-dev 
+          - libgeoip1 
+          - libgeoip-dev 
+          - geoip-bin 
+          - libxml2 
+          - libxml2-dev 
+          - libxslt1.1 
+          - libxslt1-dev
+          - sofware-properties-common
+
+      - name: Install PPA Package Dependancies
+        apt_repository:
+          validate_certs: no
+          update_cache: yes
+          repo: ppa:maxmind/ppa
+          state: present
+
+      - name: Download PCRE version 8.42
+        get_url:
+          url: "{{ pcre_tarball_url }}"
+          dest: "/tmp/{{ pcre_ver }}.tar.gz"
+        register: pcre_source
+
+      - name: Extract PCRE
+        unarchive:
+          copy: no
+          dest: /tmp/
+          src: "{{ pcre_source.dest }}"
+        register: pcre_source_extract
+
+      - name: Download zlib version 1.2.11
+        get_url:
+          url: "{{ zlib_tarball_url }}"
+          dest: "/tmp/{{ zlib_ver }}.tar.gz"
+        register: zlib_source
+        
+      - name: Extract zlib
+        unarchive:
+          copy: no
+          dest: /tmp/
+          src: "{{ zlib_source.dest }}"
+        register: zlib_source_extract
+
+      - name: Download OpenSSL version 1.1.0h
+        get_url:
+          url: "{{ openssl_tarball_url }}"
+          dest: "/tmp/{{ openssl_ver }}.tar.gz"
+        register: openssl_source
+
+      - name: Extract OpenSSL
+        unarchive:
+          copy: no
+          dest: /tmp/
+          src: "{{ openssl_source.dest }}"
+        register: openssl_source_extract
+
+      - name: Download nginx source
+        get_url:
+          url: "{{ nginx_tarball_url }}"
+          dest: "/tmp/{{ nginx_ver }}.tar.gz"
+        register: nginx_source
+
+      - name: Extract Nginx
+        unarchive:
+          copy: no
+          dest: /tmp/
+          src: "{{ nginx_source.dest }}"
+        when: nginx_source.changed
+        register: nginx_source_extract
+
+      - name: Configure nginx
+        command: "./configure --prefix=/etc/nginx \ 
+            --sbin-path=/usr/sbin/nginx \ 
+            --modules-path=/usr/lib/nginx/modules \ 
+            --conf-path=/etc/nginx/nginx.conf \
+            --error-log-path=/var/log/nginx/error.log \
+            --pid-path=/var/run/nginx.pid \
+            --lock-path=/var/run/nginx.lock \
+            --user=nginx \
+            --group=nginx \
+            --build=Ubuntu \
+            --builddir=nginx-1.15.0 \
+            --with-select_module \
+            --with-poll_module \
+            --with-threads \
+            --with-file-aio \
+            --with-http_ssl_module \
+            --with-http_v2_module \
+            --with-http_realip_module \
+            --with-http_addition_module \
+            --with-http_xslt_module=dynamic \
+            --with-http_image_filter_module=dynamic \
+            --with-http_geoip_module=dynamic \
+            --with-http_sub_module \
+            --with-http_dav_module \
+            --with-http_flv_module \
+            --with-http_mp4_module \
+            --with-http_gunzip_module \
+            --with-http_gzip_static_module \
+            --with-http_auth_request_module \
+            --with-http_random_index_module \
+            --with-http_secure_link_module \
+            --with-http_degradation_module \
+            --with-http_slice_module \
+            --with-http_stub_status_module \
+            --with-http_perl_module=dynamic \
+            --with-perl_modules_path=/usr/share/perl/5.26.1 \
+            --with-perl=/usr/bin/perl \
+            --http-log-path=/var/log/nginx/access.log \
+            --http-client-body-temp-path=/var/cache/nginx/client_temp \
+            --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+            --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+            --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+            --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+            --with-mail=dynamic \
+            --with-mail_ssl_module \
+            --with-stream=dynamic \
+            --with-stream_ssl_module \
+            --with-stream_realip_module \
+            --with-stream_geoip_module=dynamic \
+            --with-stream_ssl_preread_module \
+            --with-compat \
+            --with-pcre={{ pcre_install_dir }} \
+            --with-pcre-jit \
+            --with-zlib={{ zlib_install_dir }} \
+            --with-openssl={{ openssl_install_dir }} \
+            --with-openssl-opt=no-nextprotoneg \
+            --with-debug"
+        args:
+          chdir: "{{ nginx_install_dir }}"  
+        when: nginx_source_extract|changed    
+
+      - name: copy man nginx man page from source
+        copy:
+          src: "/tmp/{{ nginx_ver }}/man/nginx.8"
+          dest: "/usr/share/man/man8/nginx.8"
+
+      - name: Compress nginx man page
+        command: "gzip /usr/share/man/man8/nginx.8"
+
+      - name: Create nginx working directories
+        file:
+          path: "{{ item }}"
+          state: directory
+          recurse: yes
+          owner: "{{ nginx_user }}"
+          group: root
+        with_items:
+          - "/var/cache/nginx/client_temp"
+          - "/var/cache/nginx/fastcgi_temp"
+          - "/var/cache/nginx/proxy_temp"
+          - "/var/cache/nginx/scgi_temp"
+          - "/var/cache/nginx/uwsgi_temp"
+
+
+...
