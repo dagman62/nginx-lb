@@ -14,3 +14,7 @@ zlib_install_dir: "/tmp/{{ zlib_ver }}"
 openssl_install_dir: "/tmp/{{ openssl_ver }}"
 nginx_user: nginx
 nginx_group: nginx
+nginx_streams:
+  - "server1.example.com"
+  - "server2.example.com"
+  - "server3.example.com"

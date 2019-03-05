@@ -197,6 +197,18 @@
           - "/var/cache/nginx/proxy_temp"
           - "/var/cache/nginx/scgi_temp"
           - "/var/cache/nginx/uwsgi_temp"
+      
+      - name: Copy service to systemd
+        copy:
+          src: nginx.service
+          dest: "/etc/systemd/system/nginx.service"
+          owner: root
+          group: root
+          mode: 0755
 
-
+      - name: Enable and Start nginx service
+        service:
+          name: nginx
+          enabled: yes
+          state: started
 ...
