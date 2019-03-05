@@ -160,14 +160,14 @@
  - name: Copy over default template
    template:
      src: default.j2
-     dest: "/etc/nginx/sites-avaiable/default"
+     dest: "/etc/nginx/sites-available/default"
      owner: root
      group: root
      mode: 0644
 
  - name: Symlink default to enabled sites
    file:
-     src: "/etc/nginx/sites-avaiable/default"
+     src: "/etc/nginx/sites-available/default"
      dest: "/etc/nginx/sites-enabled/default"
      owner: root
      group: root
