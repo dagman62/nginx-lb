@@ -157,6 +157,22 @@
      - "/etc/nginx/sites-enabled"
      - "/etc/nginx/sites-available"
 
+ - name: Copy over default template
+   template:
+     src: default.j2
+     dest: "/etc/nginx/sites-avaiable/default"
+     owner: root
+     group: root
+     mode: 0644
+
+ - name: Symlink default to enabled sites
+   file:
+     src: "/etc/nginx/sites-avaiable/default"
+     dest: "/etc/nginx/sites-enabled/default"
+     owner: root
+     group: root
+     state: link
+
  - name: Enable and Start nginx service
    service:
      name: nginx
