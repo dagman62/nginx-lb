@@ -206,6 +206,17 @@
           group: root
           mode: 0755
 
+      - name: Create nginx configuration directories
+        file:
+          path: "{{ item }}"
+          state: directory
+          owner: root
+          group: root
+        with_items:
+          - "/etc/nginx/conf.d"
+          - "/etc/nginx/sites-enabled"
+          - "/etc/nginx/sites-available"
+
       - name: Enable and Start nginx service
         service:
           name: nginx
