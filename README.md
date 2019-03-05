@@ -10,6 +10,7 @@ Supports only Ubuntu bionic 18x
 
 Role Variables
 --------------
+```
 nginx_ver: nginx-1.15.0
 pcre_ver: pcre-8.42
 zlib_ver: zlib-1.2.11
@@ -24,7 +25,7 @@ zlib_install_dir: "/tmp/{{ zlib_ver }}"
 openssl_install_dir: "/tmp/{{ openssl_ver }}"
 nginx_user: nginx
 nginx_group: nginx
-
+```
 Example Playbook
 ----------------
 
