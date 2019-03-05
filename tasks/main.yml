@@ -110,8 +110,12 @@
      dest: "/usr/share/man/man8/nginx.8"
      remote_src: yes
 
- - name: Compress nginx man page
-   command: "gzip /usr/share/man/man8/nginx.8"
+ - name: Gzip main page
+   archive:
+     path: "/usr/share/man/man8/nginx.8"
+     dest: "/usr/share/man/man8/nginx.8.gz"
+     format: gz
+     remove: yes
 
  - name: Create nginx working directories
    file:
