@@ -33,7 +33,10 @@
      - libxml2-dev 
      - libxslt1.1 
      - libxslt1-dev
-     - sofware-properties-common
+     - software-properties-common
+     - python
+     - python-apt
+     - python-pip
 
  - name: Install PPA Package Dependancies
    apt_repository:
@@ -161,6 +164,7 @@
    copy:
      src: "/tmp/{{ nginx_ver }}/man/nginx.8"
      dest: "/usr/share/man/man8/nginx.8"
+     remote_src: yes
 
  - name: Compress nginx man page
    command: "gzip /usr/share/man/man8/nginx.8"
