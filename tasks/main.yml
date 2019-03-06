@@ -45,7 +45,7 @@
      repo: ppa:maxmind/ppa
      state: present
 
- - name: Download PCRE version 8.42
+ - name: Download PCRE version {{ pcre_ver }}
    get_url:
      url: "{{ pcre_tarball_url }}"
      dest: "/tmp/{{ pcre_ver }}.tar.gz"
@@ -58,7 +58,7 @@
      src: "{{ pcre_source.dest }}"
    register: pcre_source_extract
 
- - name: Download zlib version 1.2.11
+ - name: Download zlib version {{ zlib_ver }}
    get_url:
      url: "{{ zlib_tarball_url }}"
      dest: "/tmp/{{ zlib_ver }}.tar.gz"
@@ -71,7 +71,7 @@
      src: "{{ zlib_source.dest }}"
    register: zlib_source_extract
 
- - name: Download OpenSSL version 1.1.0h
+ - name: Download OpenSSL {{ openssl_ver }}
    get_url:
      url: "{{ openssl_tarball_url }}"
      dest: "/tmp/{{ openssl_ver }}.tar.gz"
@@ -84,7 +84,7 @@
      src: "{{ openssl_source.dest }}"
    register: openssl_source_extract
 
- - name: Download nginx source
+ - name: Download Nginx {{ nginx_ver }}
    get_url:
      url: "{{ nginx_tarball_url }}"
      dest: "/tmp/{{ nginx_ver }}.tar.gz"
