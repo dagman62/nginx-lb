@@ -30,7 +30,7 @@ galaxy_info:
    - name: Ubuntu
      versions:
        - bionic
-   - name: Centos
+   - name: RedHat
      versions:
       - 7
 
