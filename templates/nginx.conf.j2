@@ -1,7 +1,6 @@
 user {{ nginx_user }};
 worker_processes auto;
-pid /run/nginx.pid;
-#include /etc/nginx/modules-enabled/*.conf;
+pid {{ nginx_pid }};
 
 events {
 	worker_connections 768;

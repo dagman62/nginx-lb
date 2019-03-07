@@ -1,4 +1,8 @@
 ---
+# Os Specific
+ - name: Include os specific variables
+   include_vars: "{{ ansible_os_family }}.yml"
+
  - name: Ensure group {{ nginx_group }} exists
    group:
      name: "{{ nginx_group }}"
@@ -13,30 +17,18 @@
      uid: 501
      group: "{{ nginx_group }}"
 
+ - name: Install Build Tools
+   yum:
+     name: "@Development Tools"
+     state: present
+   when: ansible_os_family == "RedHat"
+
  - name: Install all dependancies
    package:
      name: "{{ item }}"
      state: present
      update_cache: yes
-   with_items:
-     - build-essential 
-     - git 
-     - tree
-     - perl 
-     - libperl-dev 
-     - libgd3 
-     - libgd-dev 
-     - libgeoip1 
-     - libgeoip-dev 
-     - geoip-bin 
-     - libxml2 
-     - libxml2-dev 
-     - libxslt1.1 
-     - libxslt1-dev
-     - software-properties-common
-     - python
-     - python-apt
-     - python-pip
+   with_items: "{{ nginx_dep_pkg }}"
 
  - name: Install PPA Package Dependancies
    apt_repository:
@@ -44,6 +36,7 @@
      update_cache: yes
      repo: ppa:maxmind/ppa
      state: present
+   when: ansible_os_family == "Debian"
 
  - name: Download PCRE version {{ pcre_ver }}
    get_url:
@@ -139,8 +132,8 @@
      - "/var/cache/nginx/uwsgi_temp"
  
  - name: Copy service to systemd
-   copy:
-     src: nginx.service
+   template:
+     src: nginx.service.j2
      dest: "/etc/systemd/system/nginx.service"
      owner: root
      group: root
@@ -186,4 +179,15 @@
      name: nginx
      enabled: yes
      state: started
+
+ - name: Open up firewall for web
+   firewalld:
+     service: "{{ item }}"
+     permanent: yes
+     state: enabled
+   with_items:
+     - http 
+     - https
+   when: ansible_os_family == "RedHat"
+   
 ...
